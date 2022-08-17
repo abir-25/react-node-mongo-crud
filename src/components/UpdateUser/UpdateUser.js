@@ -5,30 +5,23 @@ const UpdateUser = () => {
   const { id } = useParams();
   const [user, setUser] = useState([]);
 
-  const nameRef = useRef();
-  const emailRef = useRef();
-
   const handleUpdateUser = (e) => {
-    const name = nameRef.current.value;
-    const email = emailRef.current.value;
-    const editUser = { name, email };
+    e.preventDefault();
 
     fetch(`http://localhost:5000/users/update/${id}`, {
       method: "PUT",
       headers: {
         "content-type": "application/json",
       },
-      body: JSON.stringify(editUser),
+      body: JSON.stringify(user),
     })
       .then((res) => res.json())
       .then((result) => {
-        console.log("Upate:  ", result);
-        // if (result.insertedId) {
-        //   alert("Successfully Updated User");
-        //   e.target.reset();
-        // }
+        if (result.modifiedCount > 0) {
+          alert("Updated User Successfully");
+          setUser({});
+        }
       });
-    e.preventDefault();
   };
 
   useEffect(() => {
@@ -36,13 +29,32 @@ const UpdateUser = () => {
       .then((res) => res.json())
       .then((data) => setUser(data));
   }, []);
+
+  const handleNameChange = (e) => {
+    const updatedUser = { name: e.target.value, email: user.email };
+    setUser(updatedUser);
+  };
+  const handleEmailChange = (e) => {
+    const updatedUser = { name: user.name, email: e.target.value };
+    setUser(updatedUser);
+    // const updatedUser = { ...user };
+    // updatedUser.email = e.target.value;
+  };
   return (
     <div>
       <h2>Update {user.name}</h2>
       <form onSubmit={handleUpdateUser}>
-        <input type="text" defaultValue={user.name} ref={nameRef} />
+        <input
+          type="text"
+          value={user.name || ""}
+          onChange={handleNameChange}
+        />
         <br />
-        <input type="email" defaultValue={user.email} ref={emailRef} />
+        <input
+          type="email"
+          value={user.email || ""}
+          onChange={handleEmailChange}
+        />
         <br />
         <input type="submit" value="Update" />
       </form>
